@@ -30,12 +30,12 @@ odoo.define('pos_loyalty_polling.pos_polling', function (require) {
              setInterval(async () => {
                     try {
                         const result = await this.load_server_loyalty_data();
-                        console.log(result)
+                        // console.log(result)
                         this.rewards = result['loyalty.reward'] || [];
                         this.programs = result['loyalty.program'] || []; //TODO: rename to `loyaltyPrograms` etc
                         this.rules = result['loyalty.rule'] || [];
                         this._loadLoyaltyData();
-                    console.log(result);
+                    // console.log(result);
                     } catch (err) {
                         console.error("Error fetching coupons:", err);
                     }
