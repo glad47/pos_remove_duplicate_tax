@@ -12,6 +12,7 @@
         'point_of_sale.assets': [
             'pos_loyalty_polling/static/src/js/pos_loyalty_polling.js',
             'pos_loyalty_polling/static/src/js/pos_update_rewards.js',
+            'pos_loyalty_polling/static/src/js/pos_update_orderline.js',
         ],
     },
 

@@ -32,6 +32,10 @@ odoo.define('pos_loyalty_polling.pos_polling', function (require) {
                         const result = await this.load_server_loyalty_data();
                         // console.log(result)
                         this.rewards = result['loyalty.reward'] || [];
+                        // await this.env.services.rpc({
+                        //     model: 'loyalty.reward',
+                        //     method: 'compute_all_discount_product_ids',
+                        // });
                         this.programs = result['loyalty.program'] || []; //TODO: rename to `loyaltyPrograms` etc
                         this.rules = result['loyalty.rule'] || [];
                         this._loadLoyaltyData();
