@@ -15,6 +15,7 @@ odoo.define('pos_loyalty_polling.pos_orderline', function (require) {
         }
 
         // set_product_lot(product){
+        //     console.log("xxxxxxxxxxxxxxxxxx")
         //         if(product){
         //             this.has_product_lot = product.tracking !== 'none';
         //             this.pack_lot_lines  = this.has_product_lot && new PosCollection();
