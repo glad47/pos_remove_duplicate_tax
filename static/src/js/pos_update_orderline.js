@@ -14,24 +14,35 @@ odoo.define('pos_loyalty_polling.pos_orderline', function (require) {
             super(obj, options);
         }
 
-        // set_product_lot(product){
-        //     console.log("xxxxxxxxxxxxxxxxxx")
-        //         if(product){
-        //             this.has_product_lot = product.tracking !== 'none';
-        //             this.pack_lot_lines  = this.has_product_lot && new PosCollection();
-        //         }
+        set_product_lot(product){
+                if(this.product){
+                    this.has_product_lot = product.tracking !== 'none';
+                    this.pack_lot_lines  = this.has_product_lot && new PosCollection();
+                }
                 
-        // }
+        }
 
-        // // return the unit of measure of the product
-        // get_unit(){
-        //     if(product){
-        //         return this.product.get_unit();
-        //     }
-        //     return null;
+        // return the unit of measure of the product
+        get_unit(){
+            if(this.product){
+                return this.product.get_unit();
+            }
+            return null;
             
-        // }
+        }
 
+
+        set_quantity(quantity, keep_price) {
+            if(this.product){
+                return super.set_quantity(...arguments);
+            } 
+            
+        }
+
+
+        
+
+        
 
 
         };

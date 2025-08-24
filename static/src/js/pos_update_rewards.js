@@ -8,17 +8,59 @@ odoo.define('pos_loyalty_updating_reward.pos_polling', function (require) {
         class extends Order {
             constructor() {
                 super(...arguments);
-                this._startRewardPolling();
+                // this._startRewardPolling();
             }
 
-            _startRewardPolling() {
-                setInterval(() => {
-                 
-                 this._resetPrograms();
-                
 
-                }, 5);
+        _applyReward(reward, coupon_id, args) {
+            if (this._getRealCouponPoints(coupon_id) < reward.required_points) {
+                return _t("There are not enough points on the coupon to claim this reward.");
             }
+            if (reward.is_global_discount) {
+                const globalDiscountLines = this._getGlobalDiscountLines();
+                if (globalDiscountLines.length) {
+                    const rewardId = globalDiscountLines[0].reward_id;
+                    if (rewardId != reward.id && this.pos.reward_by_id[rewardId].discount >= reward.discount) {
+                        return _t("A better global discount is already applied.");
+                    } else if (rewardId != rewardId.id) {
+                        for (const line of globalDiscountLines) {
+                            this.orderlines.remove(line);
+                        }
+                    }
+                }
+            }
+            args = args || {};
+            const rewardLines = this._getRewardLineValues({
+                reward: reward,
+                coupon_id: coupon_id,
+                product: args['product'] || null,
+            });
+            if (!Array.isArray(rewardLines)) {
+                return rewardLines; // Returned an error.
+            }
+            if (!rewardLines.length) {
+                return _t("The reward could not be applied.");
+            }
+            for (const rewardLine of rewardLines) {
+                const reward = this.pos.reward_by_id[rewardLine.reward_id]
+                var check = false;
+                if(reward && reward.reward_type == "discount" ){
+                    for(var i = 0; i < this.orderlines.length; i++){
+                        if(this.orderlines[i].is_reward_line && this.orderlines[i].reward_id == rewardLine.reward_id){
+                            check= true;
+                            break
+                        }
+                    }
+                }
+                if(!check){
+                    this.orderlines.add(this._createLineFromVals(rewardLine));
+                }
+            
+            
+            }
+        return true;
+       
+    }
 
 
 
