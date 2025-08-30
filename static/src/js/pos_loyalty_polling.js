@@ -6,6 +6,8 @@ odoo.define('pos_loyalty_polling.pos_polling', function (require) {
     const { Domain, InvalidDomainError } = require('@web/core/domain');
 
 
+
+
  const PosPollingLoyalty = (PosGlobalState) => class extends PosGlobalState {
 
 
@@ -50,8 +52,14 @@ odoo.define('pos_loyalty_polling.pos_polling', function (require) {
                         this.rules = result['loyalty.rule'] || [];
                         if(this.loadedData){
                             // console.log(this.loadedData['product.product'])
-                            this._loadProductProduct2(this.loadedData['product.product']);
-                            this._loadLoyaltyData();
+                            
+                            if(this.program_by_id[this.programs[0].id] ) {
+                                 this._loadLoyaltyData();
+                                 this._loadProductProduct2(this.loadedData['product.product']);
+                            }else{
+                                console.log("working ....")
+                            }
+                           
                         }
                         
                     // console.log(result);s

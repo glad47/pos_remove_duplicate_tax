@@ -11,6 +11,8 @@ odoo.define('pos_loyalty_polling.pos_orderline', function (require) {
     const PosPollingLoyaltyOrderline = (Orderline) => class extends Orderline {
 
         constructor(obj, options) {
+            console.log("*****************************************xxxxxxxxxxxxxxxxxxxxx********************")
+            console.log(options)
             super(obj, options);
         }
 
@@ -38,6 +40,8 @@ odoo.define('pos_loyalty_polling.pos_orderline', function (require) {
             } 
             
         }
+
+        
 
 
         
