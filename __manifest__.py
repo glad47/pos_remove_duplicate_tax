@@ -5,21 +5,14 @@
     'author': "gladdema",
     'summary': 'Periodic loyalty updates for POS',
     'depends': ['point_of_sale'],
-    # 'data': [
-    #     'controllers/controllers.py',
-    # ],
     'assets': {
         'point_of_sale.assets': [
             'pos_loyalty_polling/static/src/js/pos_loyalty_polling.js',
-            'pos_loyalty_polling/static/src/js/pos_update_rewards.js',
-            'pos_loyalty_polling/static/src/js/pos_update_orderline.js',
+            'pos_loyalty_polling/static/src/js/db.js',
+            'pos_loyalty_polling/static/src/js/models.js',
         ],
     },
 
-    # 'data': [
-    #     # 'views/views.xml',
-    #     'views/templates.xml',
-    # ],
     'installable': True,
     'application': False,
     'license': 'LGPL-3',

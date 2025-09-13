@@ -18,6 +18,24 @@ odoo.define('pos_loyalty_updating_reward.pos_polling', function (require) {
             }
 
 
+        _getRewardLineValues(args) {
+            console.log("*****************************&&&&&&&&&&&&&&*****************")
+            console.log(args)
+            console.log("_getRewardLineValues")
+            const reward = args['reward'];
+            if(args['product']){
+                if (reward.reward_type === 'discount') {
+                                return this._getRewardLineValuesDiscount(args);
+                            } else if (reward.reward_type === 'product') {
+                                return this._getRewardLineValuesProduct(args);
+                            }
+            }
+           
+            // NOTE: we may reach this step if for some reason there is a free shipping reward
+            return [];
+        }    
+
+
         _applyReward(reward, coupon_id, args) {
             if (this._getRealCouponPoints(coupon_id) < reward.required_points) {
                 return _t("There are not enough points on the coupon to claim this reward.");
@@ -36,32 +54,38 @@ odoo.define('pos_loyalty_updating_reward.pos_polling', function (require) {
                 }
             }
             args = args || {};
-            if (!args['product']){
+            var productx = null 
                 if(reward.reward_type == "product"){
                     var rw = this.pos.reward_by_id[reward.id]
+                    console.log("i am inside product...")
                     console.log(rw)
                     console.log(rw.reward_product_ids[0])
-                    args['product'] = this.pos.db.get_product_by_id(rw.reward_product_ids[0]);
+                    productx = rw.reward_product_ids[0];
+                    args['product'] = productx
+                    console.log("printing product")
+                    console.log(args['product'])
                 }else{
                     console.log("i am here")
                     var rw = this.pos.reward_by_id[reward.id]
                     console.log(rw)
                     console.log(rw.all_discount_product_ids.values().next().value)
-                    args['product'] = this.pos.db.get_product_by_id(rw.all_discount_product_ids.values().next().value);
+                    productx = rw.all_discount_product_ids.values().next().value;
+                    args['product'] = productx
                     console.log(args['product'])
                 }
-                 
-            }
             if(args['product']){
                     const rewardLines = this._getRewardLineValues({
                     reward: reward,
                     coupon_id: coupon_id,
                     product: args['product'] || null,
                     });
-                    if(rewardLines && rewardLines[0] && !rewardLines[0]['product'] && typeof args['product'] !== 'string' && typeof args['product'] !== 'number' ){
-                        console.log("working working working working :) :)")
-                        rewardLines[0]['product'] = args['product']
-                    }
+                    
+
+
+                    // if(rewardLines && rewardLines[0]  && typeof productx !== 'string' && typeof productx === 'number' ){
+                    //     console.log("working working working working :) :)")
+                    //     rewardLines[0]['product'] = productx
+                    // }
                 if (!Array.isArray(rewardLines)) {
                     return rewardLines; // Returned an error.
                 }
@@ -244,7 +268,42 @@ odoo.define('pos_loyalty_updating_reward.pos_polling', function (require) {
     //         }
             
 
-
+        _getRewardLineValuesProduct(args) {
+                console.log("_getRewardLineValuesProduct")
+                const reward = args['reward'];
+                console.log("&&&&&&&&&&&**************&&&&&&&&&&&&&&&&&&&&")
+                console.log(reward.reward_product_ids)
+                console.log(args['product'])
+                const product = this.pos.db.get_product_by_id(args['product'] || reward.reward_product_ids[0]);
+                if(product){
+                    const points = this._getRealCouponPoints(args['coupon_id']);
+                                    const unclaimedQty = this._computeUnclaimedFreeProductQty(reward, args['coupon_id'], product, points);
+                                    if (unclaimedQty <= 0) {
+                                        return _t("There are not enough products in the basket to claim this reward.");
+                                    }
+                                    const claimable_count = reward.clear_wallet ? 1 : Math.min(Math.ceil(unclaimedQty / reward.reward_product_qty), Math.floor(points / reward.required_points));
+                                    const cost = reward.clear_wallet ? points : claimable_count * reward.required_points;
+                                    // In case the reward is the product multiple times, give it as many times as possible
+                                    const freeQuantity = Math.min(unclaimedQty, reward.reward_product_qty * claimable_count);
+                                    return [{
+                                        product: reward.discount_line_product_id,
+                                        price: -round_decimals(product.get_price(this.pricelist, freeQuantity), this.pos.currency.decimal_places),
+                                        tax_ids: product.taxes_id,
+                                        quantity: freeQuantity,
+                                        reward_id: reward.id,
+                                        is_reward_line: true,
+                                        reward_product_id: product.id,
+                                        coupon_id: args['coupon_id'],
+                                        points_cost: cost,
+                                        reward_identifier_code: _newRandomRewardCode(),
+                                        merge: false,
+                                    }]
+                }else{
+                    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx!!!!!!!!!!!!!! i am here")
+                    return []
+                }
+                
+            }
     
 
 

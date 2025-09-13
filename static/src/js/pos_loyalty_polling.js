@@ -12,77 +12,85 @@ odoo.define('pos_loyalty_polling.pos_polling', function (require) {
 
 
 
-
+       
         constructor(obj) {
             super(obj);
             this._startLoyaltyPolling();
         }
 
+     
 
-        async _processData(loadedData) {
-            super._processData(loadedData);
-            this.loadedData = loadedData
 
-        }
 
-       
-
-        async load_server_loyalty_data() {
+        async load_sync_latest_data() {
             const loadedData = await this.env.services.rpc({
                 model: 'pos.session',
-                method: 'load_pos_loyalty_data',
+                method: 'load_sync_latest_data',
                 args: [[odoo.pos_session_id]],
             });
 
             return loadedData;
 
+            }
+            _startLoyaltyPolling() {
+                this.previousRewards = [];
+            this.previousRules = [];
+            this.previousPrograms = [];
+
+            this._rewardInterval = setInterval(async () => {
+            try {
+
+                
+                await this.sync_server_data();
+
+            } catch (error) {
+                console.error('Polling error:', error);
+            }
+        }, 5000); // Poll every 5 seconds
+
         }
 
-        _startLoyaltyPolling() {
-             this._rewardInterval = setInterval(async () => {
-                    try {
-                        const result = await this.load_server_loyalty_data();
-                        // console.log(result)
-                        this.rewards = result['loyalty.reward'] || [];
+       
+       
 
-                        for (const reward of this.rewards) {
-                            reward.all_discount_product_ids = new Set(reward.all_discount_product_ids);
-                        }
-                        this.programs = result['loyalty.program'] || []; //TODO: rename to `loyaltyPrograms` etc
-                        this.rules = result['loyalty.rule'] || [];
-                        if(this.loadedData){
-                            // console.log(this.loadedData['product.product'])
-                            
-                            if(this.program_by_id[this.programs[0].id] ) {
-                                 this._loadLoyaltyData();
-                                 this._loadProductProduct2(this.loadedData['product.product']);
-                            }else{
-                                console.log("working ....")
-                            }
-                           
-                        }
-                        
-                    // console.log(result);s
-                    } catch (err) {
-                        console.error("Error fetching coupons:", err);
-                    }
-                }, 5000);
+
+        
+        _syncLoyaltyChanges(newRewards, newRules, newPrograms) {
+            const removedRewardIds = this._findRemovedIds(this.previousRewards, newRewards);
+            const removedRuleIds = this._findRemovedIds(this.previousRules, newRules);
+            const removedProgramIds = this._findRemovedIds(this.previousPrograms, newPrograms);
+
+            const payload = {};
+            if (removedRewardIds.length) payload['loyalty.reward'] = removedRewardIds;
+            if (removedRuleIds.length) payload['loyalty.rule'] = removedRuleIds;
+            if (removedProgramIds.length) payload['loyalty.program'] = removedProgramIds;
+
+            if (Object.keys(payload).length) {
+                this.remove_server_data(payload);
+            }
+
+            // You can also detect new additions and update accordingly
         }
+
+
+
+
 
        
         
         
-            _loadProductProduct2(products) {
-                this._loadProductProduct(...arguments);
-        
-                for (const reward of this.rewards) {
-                        this.compute_discount_product_ids(reward, products);
-                
-                      
-                }
-        
-                // this.rewards = this.rewards.filter(Boolean)
+           
+
+            _findRemovedIds(oldList, newList) {
+                const newIds = newList.map(item => item.id);
+                return oldList
+                    .filter(item => !newIds.includes(item.id))
+                    .map(item => item.id);
             }
+
+
+          
+
 
 
 
