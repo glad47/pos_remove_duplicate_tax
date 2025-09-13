@@ -46,7 +46,7 @@ odoo.define('pos_loyalty_polling.pos_polling', function (require) {
             } catch (error) {
                 console.error('Polling error:', error);
             }
-        }, 5000); // Poll every 5 seconds
+        }, 10 * 60 * 1000); // Poll every 10 minutes
 
         }
 
