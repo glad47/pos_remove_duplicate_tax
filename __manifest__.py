@@ -1,18 +1,15 @@
 {
-    'name': 'pos_loyalty_polling',
+    'name': 'pos_remove_duplicate_tax',
     'version': '16.0.1.0.0',
     'category': 'Point of Sale',
     'author': "gladdema",
-    'summary': 'Periodic loyalty updates for POS',
+    'summary': 'Remove irrelevant taxes from each orderline in the POS.',
     'depends': ['point_of_sale'],
     'assets': {
         'point_of_sale.assets': [
-            'pos_loyalty_polling/static/src/js/pos_loyalty_polling.js',
-            'pos_loyalty_polling/static/src/js/db.js',
-            'pos_loyalty_polling/static/src/js/models.js',
+            'pos_remove_duplicate_tax/static/src/js/remove_duplicate.js',
         ],
     },
-
     'installable': True,
     'application': False,
     'license': 'LGPL-3',
