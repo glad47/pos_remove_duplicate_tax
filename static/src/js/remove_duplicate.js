@@ -47,13 +47,11 @@ odoo.define('pos_remove_duplicate_tax.pos_orderline', function (require) {
 
                         discountable += line.get_price_with_tax();
 
-                        for (const taxId of lineTaxIds) {
-                            if (!discountablePerTax[taxId]) {
-                                discountablePerTax[taxId] = 0;
+                        if (!discountablePerTax[lineTaxIds]) {
+                                discountablePerTax[lineTaxIds] = 0;
                             }
-                            discountablePerTax[taxId] += line.get_base_price();
-                        }
-                    }
+                            discountablePerTax[lineTaxIds] += line.get_base_price();
+                                    }
 
                     return { discountable, discountablePerTax };
                 }
